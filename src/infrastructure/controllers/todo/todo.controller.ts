@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Inject,
+  Param,
   ParseIntPipe,
   Post,
   Put,
@@ -21,7 +22,7 @@ import { AddTodoDto, UpdateTodoDto } from './todo.dto';
 import { deleteTodoUseCases } from '../../../usecases/todo/deleteTodo.usecases';
 import { addTodoUseCases } from '../../../usecases/todo/addTodo.usecases';
 
-@Controller('todo')
+@Controller('todos')
 @ApiTags('todo')
 @ApiResponse({ status: 500, description: 'Internal error' })
 @ApiExtraModels(TodoPresenter)
@@ -39,21 +40,21 @@ export class TodoController {
     private readonly addTodoUsecaseProxy: UseCaseProxy<addTodoUseCases>,
   ) {}
 
-  @Get('todo')
+  @Get(':id')
   @ApiResponseType(TodoPresenter, false)
-  async getTodo(@Query('id', ParseIntPipe) id: number) {
+  async getTodo(@Param('id', ParseIntPipe) id: number) {
     const todo = await this.getTodoUsecaseProxy.getInstance().execute(id);
     return new TodoPresenter(todo);
   }
 
-  @Get('todos')
+  @Get('')
   @ApiResponseType(TodoPresenter, true)
   async getTodos() {
     const todos = await this.getAllTodoUsecaseProxy.getInstance().execute();
     return todos.map((todo) => new TodoPresenter(todo));
   }
 
-  @Put('todo')
+  @Put('')
   @ApiResponseType(TodoPresenter, true)
   async updateTodo(@Body() updateTodoDto: UpdateTodoDto) {
     const { id, isDone } = updateTodoDto;
@@ -61,20 +62,18 @@ export class TodoController {
     return 'success';
   }
 
-  @Delete('todo')
+  @Delete('')
   @ApiResponseType(TodoPresenter, true)
   async deleteTodo(@Query('id', ParseIntPipe) id: number) {
     await this.deleteTodoUsecaseProxy.getInstance().execute(id);
     return 'success';
   }
 
-  @Post('todo')
+  @Post('')
   @ApiResponseType(TodoPresenter, true)
   async addTodo(@Body() addTodoDto: AddTodoDto) {
     const { content } = addTodoDto;
-    const todoCreated = await this.addTodoUsecaseProxy
-      .getInstance()
-      .execute(content);
+    const todoCreated = await this.addTodoUsecaseProxy.getInstance().execute(content);
     return new TodoPresenter(todoCreated);
   }
 }

@@ -30,9 +30,7 @@ export class DatabaseTodoRepository implements TodoRepository {
     return todosEntity.map((todoEntity) => this.toTodo(todoEntity));
   }
   async findById(id: number): Promise<TodoM> {
-    const todoEntity = await this.todoEntityRepository.findOneOrFail({
-      where: { id },
-    });
+    const todoEntity = await this.todoEntityRepository.findOneOrFail({ where: { id } });
     return this.toTodo(todoEntity);
   }
   async deleteById(id: number): Promise<void> {
