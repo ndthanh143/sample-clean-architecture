@@ -32,6 +32,36 @@ export class DatabaseUserRepository implements UserRepository {
     return user;
   }
 
+  async updateRefreshToken(email: string, refreshToken: string): Promise<void> {
+    await this.userEntityRepository.update(
+      {
+        email: email,
+      },
+      { hachRefreshToken: refreshToken },
+    );
+  }
+
+  async getUserByEmail(email: string): Promise<UserM> {
+    const adminUserEntity = await this.userEntityRepository.findOne({
+      where: {
+        email: email,
+      },
+    });
+    if (!adminUserEntity) {
+      return null;
+    }
+    return this.toUser(adminUserEntity);
+  }
+
+  async updateLastLogin(email: string): Promise<void> {
+    await this.userEntityRepository.update(
+      {
+        email: email,
+      },
+      { lastLogin: () => 'CURRENT_TIMESTAMP' },
+    );
+  }
+
   private toUserEntity(user: UserM): User {
     const userEntity: User = new User();
 

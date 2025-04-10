@@ -14,11 +14,25 @@ import { DatabaseUserRepository } from '../repositories/user.repository';
 import { createUserUsecases } from 'src/usecases/user/createUser.usecase';
 import { EnvironmentConfigService } from '../config/environment-config/environment-config.service';
 import { EnvironmentConfigModule } from '../config/environment-config/environment-config.module';
+import { JwtTokenService } from '../services/jwt/jwt.service';
+import { BcryptService } from '../services/bcrypt/bcrypt.service';
+import { LoginUseCases } from 'src/usecases/auth/login.usecases';
+import { JwtModule } from '../services/jwt/jwt.module';
+import { BcryptModule } from '../services/bcrypt/bcrypt.module';
 
 @Module({
-  imports: [EnvironmentConfigModule, LoggerModule, RepositoriesModule, ExceptionsModule],
+  imports: [
+    EnvironmentConfigModule,
+    JwtModule,
+    BcryptModule,
+    LoggerModule,
+    RepositoriesModule,
+    ExceptionsModule,
+  ],
 })
 export class UsecasesProxyModule {
+  static LOGIN_USECASES_PROXY = 'LoginUseCasesProxy';
+
   static GET_TODO_USECASES_PROXY = 'getTodoUsecasesProxy';
   static GET_TODOS_USECASES_PROXY = 'getTodosUsecasesProxy';
   static POST_TODO_USECASES_PROXY = 'postTodoUsecasesProxy';
@@ -31,6 +45,26 @@ export class UsecasesProxyModule {
     return {
       module: UsecasesProxyModule,
       providers: [
+        {
+          inject: [
+            LoggerService,
+            JwtTokenService,
+            EnvironmentConfigService,
+            DatabaseUserRepository,
+            BcryptService,
+          ],
+          provide: UsecasesProxyModule.LOGIN_USECASES_PROXY,
+          useFactory: (
+            logger: LoggerService,
+            jwtTokenService: JwtTokenService,
+            config: EnvironmentConfigService,
+            userRepo: DatabaseUserRepository,
+            bcryptService: BcryptService,
+          ) =>
+            new UseCaseProxy(
+              new LoginUseCases(logger, jwtTokenService, config, userRepo, bcryptService),
+            ),
+        },
         {
           inject: [DatabaseTodoRepository],
           provide: UsecasesProxyModule.GET_TODO_USECASES_PROXY,
@@ -63,10 +97,13 @@ export class UsecasesProxyModule {
         },
         // User
         {
-          inject: [LoggerService, DatabaseUserRepository],
+          inject: [LoggerService, DatabaseUserRepository, BcryptService],
           provide: UsecasesProxyModule.POST_USER_USECASES_PROXY,
-          useFactory: (logger: LoggerService, userRepository: DatabaseUserRepository) =>
-            new UseCaseProxy(new createUserUsecases(logger, userRepository)),
+          useFactory: (
+            logger: LoggerService,
+            userRepository: DatabaseUserRepository,
+            bcryptService: BcryptService,
+          ) => new UseCaseProxy(new createUserUsecases(logger, userRepository, bcryptService)),
         },
       ],
       exports: [
@@ -77,6 +114,7 @@ export class UsecasesProxyModule {
         UsecasesProxyModule.DELETE_TODO_USECASES_PROXY,
         // User
         UsecasesProxyModule.POST_USER_USECASES_PROXY,
+        UsecasesProxyModule.LOGIN_USECASES_PROXY,
       ],
     };
   }
