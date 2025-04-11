@@ -19,7 +19,7 @@ export class LoginUseCases {
     const secret = this.jwtConfig.getJwtSecret();
     const expiresIn = this.jwtConfig.getJwtExpirationTime();
     const token = this.jwtTokenService.createToken(payload, secret, expiresIn);
-    return { token, maxAge: 3600 };
+    return { token, maxAge: 15 * 60 * 1000 };
   }
 
   async getCookieWithJwtRefreshToken(email: string) {
@@ -31,18 +31,19 @@ export class LoginUseCases {
     await this.setCurrentRefreshToken(token, email);
     return {
       token,
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     };
   }
 
   async validateUserForLocalStragtegy(email: string, pass: string) {
-    const user = await this.userRepository.getUserByEmail(email);
+    const user = await this.userRepository.getUserLogin(email);
     if (!user) {
       return null;
     }
     const match = await this.bcryptService.compare(pass, user.password);
     if (user && match) {
       await this.updateLoginTime(user.email);
+
       const { password, ...result } = user;
       return result;
     }
@@ -51,6 +52,7 @@ export class LoginUseCases {
 
   async validateUserForJWTStragtegy(email: string) {
     const user = await this.userRepository.getUserByEmail(email);
+
     if (!user) {
       return null;
     }
@@ -67,7 +69,7 @@ export class LoginUseCases {
   }
 
   async getUserIfRefreshTokenMatches(refreshToken: string, email: string) {
-    const user = await this.userRepository.getUserByEmail(email);
+    const user = await this.userRepository.getUserLogin(email);
     if (!user) {
       return null;
     }

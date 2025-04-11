@@ -19,6 +19,10 @@ import { BcryptService } from '../services/bcrypt/bcrypt.service';
 import { LoginUseCases } from 'src/usecases/auth/login.usecases';
 import { JwtModule } from '../services/jwt/jwt.module';
 import { BcryptModule } from '../services/bcrypt/bcrypt.module';
+import { IsAuthenticatedUseCases } from 'src/usecases/auth/isAuthenticated.usecases';
+import { getUserProfileUsecases } from 'src/usecases/user/getProfile.usecase';
+import { LogoutUseCases } from 'src/usecases/auth/logout.usecases';
+import { updateProfileUsecases } from 'src/usecases/user/updateProfile.usecase';
 
 @Module({
   imports: [
@@ -32,6 +36,9 @@ import { BcryptModule } from '../services/bcrypt/bcrypt.module';
 })
 export class UsecasesProxyModule {
   static LOGIN_USECASES_PROXY = 'LoginUseCasesProxy';
+  static IS_AUTHENTICATED_USECASES_PROXY = 'isAuthenticatedUsecasesProxy';
+  static LOGOUT_USECASES_PROXY = 'logoutUsecasesProxy';
+  static REFRESH_TOKEN_USECASES_PROXY = 'refreshTokenUsecasesProxy';
 
   static GET_TODO_USECASES_PROXY = 'getTodoUsecasesProxy';
   static GET_TODOS_USECASES_PROXY = 'getTodosUsecasesProxy';
@@ -40,6 +47,8 @@ export class UsecasesProxyModule {
   static PUT_TODO_USECASES_PROXY = 'putTodoUsecasesProxy';
 
   static POST_USER_USECASES_PROXY = 'postUserUsecasesProxy';
+  static GET_USER_PROFILE_USECASES_PROXY = 'getUserProfileUsecasesProxy';
+  static PUT_USER_USECASES_PROXY = 'putUserUsecasesProxy';
 
   static register(): DynamicModule {
     return {
@@ -64,6 +73,17 @@ export class UsecasesProxyModule {
             new UseCaseProxy(
               new LoginUseCases(logger, jwtTokenService, config, userRepo, bcryptService),
             ),
+        },
+        {
+          inject: [DatabaseUserRepository],
+          provide: UsecasesProxyModule.IS_AUTHENTICATED_USECASES_PROXY,
+          useFactory: (userRepo: DatabaseUserRepository) =>
+            new UseCaseProxy(new IsAuthenticatedUseCases(userRepo)),
+        },
+        {
+          inject: [],
+          provide: UsecasesProxyModule.LOGOUT_USECASES_PROXY,
+          useFactory: () => new UseCaseProxy(new LogoutUseCases()),
         },
         {
           inject: [DatabaseTodoRepository],
@@ -105,6 +125,18 @@ export class UsecasesProxyModule {
             bcryptService: BcryptService,
           ) => new UseCaseProxy(new createUserUsecases(logger, userRepository, bcryptService)),
         },
+        {
+          inject: [LoggerService, DatabaseUserRepository],
+          provide: UsecasesProxyModule.GET_USER_PROFILE_USECASES_PROXY,
+          useFactory: (logger: LoggerService, userRepository: DatabaseUserRepository) =>
+            new UseCaseProxy(new getUserProfileUsecases(logger, userRepository)),
+        },
+        {
+          inject: [LoggerService, DatabaseUserRepository],
+          provide: UsecasesProxyModule.PUT_USER_USECASES_PROXY,
+          useFactory: (logger: LoggerService, userRepository: DatabaseUserRepository) =>
+            new UseCaseProxy(new updateProfileUsecases(logger, userRepository)),
+        },
       ],
       exports: [
         UsecasesProxyModule.GET_TODO_USECASES_PROXY,
@@ -114,7 +146,13 @@ export class UsecasesProxyModule {
         UsecasesProxyModule.DELETE_TODO_USECASES_PROXY,
         // User
         UsecasesProxyModule.POST_USER_USECASES_PROXY,
+        UsecasesProxyModule.GET_USER_PROFILE_USECASES_PROXY,
+        UsecasesProxyModule.PUT_USER_USECASES_PROXY,
+        // Auth
         UsecasesProxyModule.LOGIN_USECASES_PROXY,
+        UsecasesProxyModule.IS_AUTHENTICATED_USECASES_PROXY,
+        UsecasesProxyModule.LOGOUT_USECASES_PROXY,
+        // UsecasesProxyModule.REFRESH_TOKEN_USECASES_PROXY,
       ],
     };
   }

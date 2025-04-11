@@ -22,8 +22,6 @@ export class createUserUsecases {
     user.email = email;
     user.password = await this.bycryptService.hash(password);
 
-    console.log('user.password', user.password);
-
     const result = await this.userRepository.insert(user);
     this.logger.log('createUserUsecases execute', 'New user have been inserted');
     return result;

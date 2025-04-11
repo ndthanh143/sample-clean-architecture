@@ -15,7 +15,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     private readonly logger: LoggerService,
     private readonly exceptionService: ExceptionsService,
   ) {
-    super();
+    super({ usernameField: 'email' });
   }
 
   async validate(email: string, password: string) {
@@ -23,6 +23,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       this.logger.warn('LocalStrategy', `email or password is missing, BadRequestException`);
       this.exceptionService.UnauthorizedException();
     }
+
     const user = await this.loginUsecaseProxy
       .getInstance()
       .validateUserForLocalStragtegy(email, password);

@@ -22,3 +22,23 @@ export class CreateUserDto {
   @IsString()
   readonly lastName: string;
 }
+
+export class UpdateUserDto {
+  @ApiProperty({ required: true })
+  @IsNotEmpty()
+  @IsString()
+  readonly firstName: string;
+
+  @ApiProperty({ required: true })
+  @IsNotEmpty()
+  @IsString()
+  readonly lastName: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  readonly phone: string;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  readonly birthday: string;
+}

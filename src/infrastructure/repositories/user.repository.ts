@@ -28,6 +28,10 @@ export class DatabaseUserRepository implements UserRepository {
     user.password = userEntity.password;
     user.createdDate = userEntity.createdDate;
     user.updatedDate = userEntity.updatedDate;
+    user.phone = userEntity.phone;
+    user.birthday = userEntity.birthday;
+    user.avatarUrl = userEntity.avatarUrl;
+    user.lastLogin = userEntity.lastLogin;
 
     return user;
   }
@@ -42,15 +46,57 @@ export class DatabaseUserRepository implements UserRepository {
   }
 
   async getUserByEmail(email: string): Promise<UserM> {
-    const adminUserEntity = await this.userEntityRepository.findOne({
+    const userEntity = await this.userEntityRepository.findOne({
       where: {
         email: email,
       },
     });
-    if (!adminUserEntity) {
+
+    if (!userEntity) {
       return null;
     }
-    return this.toUser(adminUserEntity);
+    return this.toUser(userEntity);
+  }
+
+  async getUserLogin(email: string): Promise<UserM> {
+    const userEntity = await this.userEntityRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.email = :email', { email })
+      .getOne();
+
+    if (!userEntity) {
+      return null;
+    }
+    return this.toUser(userEntity);
+  }
+
+  async updatePassword(email: string, password: string): Promise<void> {
+    await this.userEntityRepository.update(
+      {
+        email: email,
+      },
+      { password: password },
+    );
+  }
+
+  async updateProfile(email: string, payload: UserM): Promise<UserM> {
+    console.log('payload', payload);
+    const user = await this.userEntityRepository.findOne({
+      where: {
+        email,
+      },
+    });
+    if (!user) {
+      return null;
+    }
+    user.firstName = payload.firstName;
+    user.lastName = payload.lastName;
+    user.phone = payload.phone;
+    user.birthday = payload.birthday;
+    user.avatarUrl = payload.avatarUrl;
+    await this.userEntityRepository.save(user);
+    return this.toUser(user);
   }
 
   async updateLastLogin(email: string): Promise<void> {
@@ -69,6 +115,10 @@ export class DatabaseUserRepository implements UserRepository {
     userEntity.lastName = user.lastName;
     userEntity.email = user.email;
     userEntity.password = user.password;
+    userEntity.phone = user.phone;
+    userEntity.birthday = user.birthday;
+    userEntity.avatarUrl = user.avatarUrl;
+    userEntity.lastLogin = user.lastLogin;
 
     return userEntity;
   }
