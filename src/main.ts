@@ -1,12 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { AllExceptionFilter } from './infrastructure/common/filters/exception.filter';
-import { LoggerService } from './infrastructure/logger/logger.service';
+import { AllExceptionFilter } from '@/infrastructure/common/filters/exception.filter';
+import { LoggerService } from '@/infrastructure/logger/logger.service';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import {
   ResponseFormat,
   ResponseInterceptor,
-} from './infrastructure/common/interceptors/response.interceptor';
+} from '@/infrastructure/common/interceptors/response.interceptor';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 
@@ -19,6 +19,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalPipes(new ValidationPipe());
   app.use(cookieParser());
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   if (env !== 'production') {
     const config = new DocumentBuilder()

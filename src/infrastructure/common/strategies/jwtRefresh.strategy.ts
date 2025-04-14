@@ -8,7 +8,7 @@ import { UseCaseProxy } from '../../usecases-proxy/usecases-proxy';
 import { LoginUseCases } from '../../../usecases/auth/login.usecases';
 import { LoggerService } from '../../logger/logger.service';
 import { ExceptionsService } from '../../exceptions/exceptions.service';
-import { TokenPayload } from 'src/domain/model/auth';
+import { TokenPayload } from '@/domain/model/auth';
 
 @Injectable()
 export class JwtRefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refresh-token') {
@@ -37,7 +37,7 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-ref
       .getUserIfRefreshTokenMatches(refreshToken, payload.email);
     if (!user) {
       this.logger.warn('JwtStrategy', `User not found or hash not correct`);
-      this.exceptionService.UnauthorizedException({
+      this.exceptionService.unAuthorizedException({
         message: 'User not found or hash not correct',
       });
     }

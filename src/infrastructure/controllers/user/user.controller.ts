@@ -5,11 +5,11 @@ import { UsecasesProxyModule } from '../../usecases-proxy/usecases-proxy.module'
 import { ApiResponseType } from '../../common/swagger/response.decorator';
 import { UserPresenter } from './user.presenter';
 import { CreateUserDto, UpdateUserDto } from './user.dto';
-import { createUserUsecases } from 'src/usecases/user/createUser.usecase';
-import { JwtAuthGuard } from 'src/infrastructure/common/guards/jwtAuth.guard';
-import { getUserProfileUsecases } from 'src/usecases/user/getProfile.usecase';
-import { CurrentUser } from 'src/infrastructure/decorators';
-import { updateProfileUsecases } from 'src/usecases/user/updateProfile.usecase';
+import { createUserUsecases } from '@/usecases/user/createUser.usecase';
+import { JwtAuthGuard } from '@/infrastructure/common/guards/jwtAuth.guard';
+import { getUserProfileUsecases } from '@/usecases/user/getProfile.usecase';
+import { CurrentUser } from '@/infrastructure/decorators';
+import { updateProfileUsecases } from '@/usecases/user/updateProfile.usecase';
 
 @Controller('users')
 @ApiTags('users')

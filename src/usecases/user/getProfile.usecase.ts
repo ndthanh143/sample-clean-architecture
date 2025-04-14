@@ -1,6 +1,6 @@
-import { UserRepository } from 'src/domain/repositories/userRepository.interface';
+import { UserRepository } from '@/domain/repositories/userRepository.interface';
 import { ILogger } from '../../domain/logger/logger.interface';
-import { UserWithoutPassword } from 'src/domain/model/user';
+import { UserWithoutPassword } from '@/domain/model/user';
 
 export class getUserProfileUsecases {
   constructor(

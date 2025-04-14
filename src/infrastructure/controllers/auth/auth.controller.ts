@@ -1,17 +1,17 @@
 import { Body, Controller, Get, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiExtraModels, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { IsAuthPresenter } from './auth.presenter';
-import { LoginGuard } from 'src/infrastructure/common/guards/login.guard';
+import { LoginGuard } from '@/infrastructure/common/guards/login.guard';
 import { AuthLoginDto } from './auth-dto';
 import { Response } from 'express';
-import { UsecasesProxyModule } from 'src/infrastructure/usecases-proxy/usecases-proxy.module';
-import { UseCaseProxy } from 'src/infrastructure/usecases-proxy/usecases-proxy';
-import { LoginUseCases } from 'src/usecases/auth/login.usecases';
-import { IsAuthenticatedUseCases } from 'src/usecases/auth/isAuthenticated.usecases';
-import { JwtAuthGuard } from 'src/infrastructure/common/guards/jwtAuth.guard';
-import { ApiResponseType } from 'src/infrastructure/common/swagger/response.decorator';
-import JwtRefreshGuard from 'src/infrastructure/common/guards/jwtRefresh.guard';
-import { CurrentUser } from 'src/infrastructure/decorators';
+import { UsecasesProxyModule } from '@/infrastructure/usecases-proxy/usecases-proxy.module';
+import { UseCaseProxy } from '@/infrastructure/usecases-proxy/usecases-proxy';
+import { LoginUseCases } from '@/usecases/auth/login.usecases';
+import { IsAuthenticatedUseCases } from '@/usecases/auth/isAuthenticated.usecases';
+import { JwtAuthGuard } from '@/infrastructure/common/guards/jwtAuth.guard';
+import { ApiResponseType } from '@/infrastructure/common/swagger/response.decorator';
+import JwtRefreshGuard from '@/infrastructure/common/guards/jwtRefresh.guard';
+import { CurrentUser } from '@/infrastructure/decorators';
 
 @Controller('auth')
 @ApiTags('auth')

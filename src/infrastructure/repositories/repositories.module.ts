@@ -1,14 +1,16 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmConfigModule } from '../config/typeorm/typeorm.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Todo } from '../entities/todo.entity';
 import { User } from '../entities/user.entity';
-import { DatabaseTodoRepository } from './todo.repository';
 import { DatabaseUserRepository } from './user.repository';
+import { Category } from '../entities/category.entity';
+import { DatabaseCategoryRepository } from './category.repository';
+import { DatabaseProductRepository } from './product.repository';
+import { Product } from '../entities/product.entity';
 
 @Module({
-  imports: [TypeOrmConfigModule, TypeOrmModule.forFeature([Todo, User])],
-  providers: [DatabaseTodoRepository, DatabaseUserRepository],
-  exports: [DatabaseTodoRepository, DatabaseUserRepository],
+  imports: [TypeOrmConfigModule, TypeOrmModule.forFeature([User, Category, Product])],
+  providers: [DatabaseUserRepository, DatabaseCategoryRepository, DatabaseProductRepository],
+  exports: [DatabaseUserRepository, DatabaseCategoryRepository, DatabaseProductRepository],
 })
 export class RepositoriesModule {}

@@ -1,4 +1,4 @@
-import { JWTConfig } from 'src/domain/config/jwt.interface';
+import { JWTConfig } from '@/domain/config/jwt.interface';
 import { IBcryptService } from '../../domain/adapters/bcrypt.interface';
 import { IJwtService, IJwtServicePayload } from '../../domain/adapters/jwt.interface';
 import { ILogger } from '../../domain/logger/logger.interface';

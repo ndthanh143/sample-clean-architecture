@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserWithoutPassword } from 'src/domain/model/user';
+import { UserWithoutPassword } from '@/domain/model/user';
 
 export class UserPresenter {
   @ApiProperty()

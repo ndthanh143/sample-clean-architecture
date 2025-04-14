@@ -1,7 +1,7 @@
-import { UserRepository } from 'src/domain/repositories/userRepository.interface';
+import { UserRepository } from '@/domain/repositories/userRepository.interface';
 import { ILogger } from '../../domain/logger/logger.interface';
-import { UserWithoutPassword } from 'src/domain/model/user';
-import { UpdateUserDto } from 'src/infrastructure/controllers/user/user.dto';
+import { UserWithoutPassword } from '@/domain/model/user';
+import { UpdateUserDto } from '@/infrastructure/controllers/user/user.dto';
 
 export class updateProfileUsecases {
   constructor(

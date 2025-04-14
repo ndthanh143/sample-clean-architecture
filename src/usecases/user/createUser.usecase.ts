@@ -1,7 +1,7 @@
-import { UserRepository } from 'src/domain/repositories/userRepository.interface';
+import { UserRepository } from '@/domain/repositories/userRepository.interface';
 import { ILogger } from '../../domain/logger/logger.interface';
-import { UserM } from 'src/domain/model/user';
-import { BcryptService } from 'src/infrastructure/services/bcrypt/bcrypt.service';
+import { UserM } from '@/domain/model/user';
+import { BcryptService } from '@/infrastructure/services/bcrypt/bcrypt.service';
 
 export class createUserUsecases {
   constructor(

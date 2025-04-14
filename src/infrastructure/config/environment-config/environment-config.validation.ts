@@ -1,6 +1,6 @@
 import { plainToClass } from 'class-transformer';
 import { IsBoolean, IsEnum, IsNumber, IsString, validateSync } from 'class-validator';
-
+import * as path from 'path';
 enum Environment {
   Development = 'development',
   Production = 'production',
