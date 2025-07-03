@@ -21,7 +21,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   async validate(email: string, password: string) {
     if (!email || !password) {
       this.logger.warn('LocalStrategy', `email or password is missing, BadRequestException`);
-      this.exceptionService.unAuthorizedException();
+      this.exceptionService.unauthorizedException();
     }
 
     const user = await this.loginUsecaseProxy
@@ -29,7 +29,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       .validateUserForLocalStragtegy(email, password);
     if (!user) {
       this.logger.warn('LocalStrategy', `Invalid email or password`);
-      this.exceptionService.unAuthorizedException({ message: 'Invalid email or password.' });
+      this.exceptionService.unauthorizedException({ message: 'Invalid email or password.' });
     }
     return user;
   }

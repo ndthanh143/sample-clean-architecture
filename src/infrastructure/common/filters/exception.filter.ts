@@ -1,11 +1,6 @@
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
 import { LoggerService } from '../../logger/logger.service';
+import { MulterError } from 'multer';
 
 interface IError {
   message: string;
@@ -23,11 +18,28 @@ export class AllExceptionFilter implements ExceptionFilter {
     const status =
       exception instanceof HttpException
         ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
-    const message =
-      exception instanceof HttpException
-        ? (exception.getResponse() as IError)
-        : { message: (exception as Error).message, code_error: null };
+        : exception instanceof MulterError
+          ? HttpStatus.BAD_REQUEST
+          : HttpStatus.INTERNAL_SERVER_ERROR;
+
+    let message: IError;
+
+    if (exception instanceof HttpException) {
+      message = exception.getResponse() as IError;
+    } else if (exception instanceof MulterError) {
+      message = {
+        message:
+          exception.code === 'LIMIT_FILE_SIZE'
+            ? 'File size should not exceed 20MB.'
+            : 'File upload error.',
+        code_error: exception.code,
+      };
+    } else {
+      message = {
+        message: (exception as Error).message,
+        code_error: null,
+      };
+    }
 
     const responseData = {
       ...{
@@ -43,12 +55,7 @@ export class AllExceptionFilter implements ExceptionFilter {
     response.status(status).json(responseData);
   }
 
-  private logMessage(
-    request: any,
-    message: IError,
-    status: number,
-    exception: any,
-  ) {
+  private logMessage(request: any, message: IError, status: number, exception: any) {
     if (status === 500) {
       this.logger.error(
         `End Request for ${request.path}`,

@@ -1,7 +1,6 @@
 import { AutoMap } from '@automapper/classes';
 import { CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
-@Entity()
 export class Base {
   @AutoMap()
   @PrimaryGeneratedColumn({ type: 'integer' })

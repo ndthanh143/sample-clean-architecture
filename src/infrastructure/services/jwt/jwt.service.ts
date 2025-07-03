@@ -13,8 +13,8 @@ export class JwtTokenService implements IJwtService {
 
   createToken(payload: IJwtServicePayload, secret: string, expiresIn: string): string {
     return this.jwtService.sign(payload, {
-      secret: secret,
-      expiresIn: expiresIn,
+      secret,
+      expiresIn,
     });
   }
 }

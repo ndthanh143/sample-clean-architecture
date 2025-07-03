@@ -1,0 +1,40 @@
+{{!-- {{> header title="Xác nhận đơn hàng của bạn tại {{productName}}" }} --}}
+
+<p>Chào {{userName}},</p>
+
+<p>Chúng tôi vui mừng thông báo rằng đơn hàng của bạn tại
+  <strong>AccountVNS</strong>
+  đã được xác nhận thành công.</p>
+
+<p><strong>Mã đơn hàng:</strong> {{orderId}}</p>
+
+<p><strong>Ngày đặt hàng:</strong> {{orderDate}}</p>
+
+<p><strong>Thông tin sản phẩm:</strong></p>
+<ul>
+  {{#each orderItems}}
+    <li>
+      <strong>{{this.product.name}}</strong>
+      -
+      {{this.quantity}}
+      x
+      {{this.priceAtPurchase}}
+      VNĐ
+    </li>
+  {{/each}}
+</ul>
+
+<p><strong>Tổng cộng:</strong> {{totalAmount}} VNĐ</p>
+
+<p><strong>Phương thức thanh toán:</strong> {{paymentMethod}}</p>
+
+<p>Chúng tôi sẽ thông báo khi đơn hàng của bạn được xử lý và gửi đi. Bạn có thể theo dõi trạng thái
+  của đơn hàng tại trang
+  <a href='{{trackingLink}}'>Theo dõi đơn hàng</a>.</p>
+
+<p>Chúng tôi rất vui khi được phục vụ bạn. Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với
+  chúng tôi qua email hoặc số điện thoại hỗ trợ trên website.</p>
+
+<p>Trân trọng,</p>
+
+{{!-- {{> footer }} --}}

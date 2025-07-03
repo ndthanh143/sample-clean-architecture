@@ -3,6 +3,7 @@ import { IBcryptService } from '../../domain/adapters/bcrypt.interface';
 import { IJwtService, IJwtServicePayload } from '../../domain/adapters/jwt.interface';
 import { ILogger } from '../../domain/logger/logger.interface';
 import { UserRepository } from '../../domain/repositories/userRepository.interface';
+import { IGoogleAuthService } from '@/domain/adapters/googleAuth.service';
 
 export class LoginUseCases {
   constructor(
@@ -11,20 +12,19 @@ export class LoginUseCases {
     private readonly jwtConfig: JWTConfig,
     private readonly userRepository: UserRepository,
     private readonly bcryptService: IBcryptService,
+    private readonly googleAuthService: IGoogleAuthService,
   ) {}
 
-  async getCookieWithJwtToken(email: string) {
-    this.logger.log('LoginUseCases execute', `The user ${email} have been logged.`);
-    const payload: IJwtServicePayload = { email: email };
+  async getCookieWithJwtToken(userId: number, email: string) {
+    const payload: IJwtServicePayload = { id: userId, email };
     const secret = this.jwtConfig.getJwtSecret();
     const expiresIn = this.jwtConfig.getJwtExpirationTime();
     const token = this.jwtTokenService.createToken(payload, secret, expiresIn);
     return { token, maxAge: 15 * 60 * 1000 };
   }
 
-  async getCookieWithJwtRefreshToken(email: string) {
-    this.logger.log('LoginUseCases execute', `The user ${email} have been logged.`);
-    const payload: IJwtServicePayload = { email: email };
+  async getCookieWithJwtRefreshToken(userId: number, email: string) {
+    const payload: IJwtServicePayload = { id: userId, email: email };
     const secret = this.jwtConfig.getJwtRefreshSecret();
     const expiresIn = this.jwtConfig.getJwtRefreshExpirationTime();
     const token = this.jwtTokenService.createToken(payload, secret, expiresIn);
@@ -51,12 +51,7 @@ export class LoginUseCases {
   }
 
   async validateUserForJWTStragtegy(email: string) {
-    const user = await this.userRepository.getUserByEmail(email);
-
-    if (!user) {
-      return null;
-    }
-    return user;
+    return this.userRepository.getUserByEmail(email);
   }
 
   async updateLoginTime(email: string) {
@@ -76,12 +71,21 @@ export class LoginUseCases {
 
     const isRefreshTokenMatching = await this.bcryptService.compare(
       refreshToken,
-      user.hashRefreshToken,
+      user.hachRefreshToken,
     );
+
     if (isRefreshTokenMatching) {
       return user;
     }
 
     return null;
+  }
+
+  async validateUserForGoogleStragtegy(idToken: string) {
+    return this.googleAuthService.verifyIDToken(idToken);
+  }
+
+  async findOrCreateGoogleUser(email: string, name: string, picture: string) {
+    return this.userRepository.getUserByEmail(email);
   }
 }

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { UserWithoutPassword } from '@/domain/model/user';
+import { Role } from '@/utils';
 
 export class UserPresenter {
   @ApiProperty()
@@ -17,6 +18,8 @@ export class UserPresenter {
   @ApiProperty()
   lastLogin: Date;
   @ApiProperty()
+  roles: Role;
+  @ApiProperty()
   email: string;
   @ApiProperty()
   createdDate: Date;
@@ -31,6 +34,7 @@ export class UserPresenter {
     this.phone = user.phone;
     this.birthday = user.birthday;
     this.avatarUrl = user.avatarUrl;
+    this.roles = user.roles;
     this.lastLogin = user.lastLogin;
     this.createdDate = user.createdDate;
     this.updatedDate = user.updatedDate;

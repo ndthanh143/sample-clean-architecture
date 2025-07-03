@@ -27,7 +27,7 @@ export class UserController {
 
   @Post('signup')
   @ApiResponseType(UserPresenter, true)
-  async addTodo(@Body() createUserDto: CreateUserDto) {
+  async signUp(@Body() createUserDto: CreateUserDto) {
     const { firstName, lastName, email, password } = createUserDto;
 
     const userCreated = await this.createUserUsecasesProxy

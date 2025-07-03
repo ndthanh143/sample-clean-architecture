@@ -1,8 +1,12 @@
 import { ILogger } from '@/domain/logger/logger.interface';
 import { ProductM } from '@/domain/model/product';
+import { ProductPlanM } from '@/domain/model/product-plan';
+import { ProductVariantM } from '@/domain/model/product-variant';
 import { CategoryRepository } from '@/domain/repositories/categoryRepository.interface';
 import { ProductRepository } from '@/domain/repositories/productRepository.interface';
-import { AddProductDto } from '@/infrastructure/controllers/product/product-dto';
+import { AddProductPlanDto } from '@/infrastructure/controllers/product-plan/product-plan.dto';
+import { AddProductVariantDto } from '@/infrastructure/controllers/product-variant/product-variant.dto';
+import { AddProductDto } from '@/infrastructure/controllers/product/product.dto';
 import { Mapper } from '@automapper/core';
 
 export class AddProductUseCases {

@@ -19,12 +19,16 @@ export class DatabaseCategoryRepository implements CategoryRepository {
 
   async insert(category: CategoryM): Promise<CategoryM> {
     const entity = this.mapper.map(category, CategoryM, Category);
-    const result = await this.repository.insert(entity);
-    return this.mapper.map(result.generatedMaps[0] as Category, Category, CategoryM);
+    const result = await this.repository.save(entity);
+    return this.mapper.map(result, Category, CategoryM);
   }
 
   async findAll(): Promise<CategoryM[]> {
-    const entities = await this.repository.find();
+    const entities = await this.repository
+      .createQueryBuilder('category')
+      .loadRelationCountAndMap('category.productCount', 'category.products')
+      .getMany();
+
     return this.mapper.mapArrayAsync(entities, Category, CategoryM);
   }
 
@@ -32,6 +36,14 @@ export class DatabaseCategoryRepository implements CategoryRepository {
     const entity = await this.repository.findOne({ where: { id } });
     if (!entity) {
       throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+    return this.mapper.map(entity, Category, CategoryM);
+  }
+
+  async findBySlug(slug: string): Promise<CategoryM> {
+    const entity = await this.repository.findOne({ where: { slug } });
+    if (!entity) {
+      throw new NotFoundException(`Category with slug ${slug} not found`);
     }
     return this.mapper.map(entity, Category, CategoryM);
   }

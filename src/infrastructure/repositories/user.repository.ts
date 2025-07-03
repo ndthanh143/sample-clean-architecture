@@ -1,39 +1,40 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { UserRepository } from '@/domain/repositories/userRepository.interface';
 import { User } from '../entities/user.entity';
 import { UserM } from '@/domain/model/user';
+import { Mapper } from '@automapper/core';
+import { InjectMapper } from '@automapper/nestjs';
 
 @Injectable()
 export class DatabaseUserRepository implements UserRepository {
   constructor(
     @InjectRepository(User)
     private readonly userEntityRepository: Repository<User>,
+    @InjectMapper()
+    private readonly mapper: Mapper,
   ) {}
 
   async insert(user: UserM): Promise<UserM> {
-    const todoEntity = this.toUserEntity(user);
-    const result = await this.userEntityRepository.insert(todoEntity);
-    return this.toUser(result.generatedMaps[0] as User);
+    const userEntity = this.mapper.map(user, UserM, User);
+    const result = await this.userEntityRepository.save(userEntity);
+    return this.mapper.map(result, User, UserM);
   }
+  async createGoogleUser(email: string, name: string, picture: string): Promise<UserM> {
+    const nameParts = name.trim().split(/\s+/);
+    const firstName = nameParts.pop();
+    const lastName = nameParts.join(' ');
 
-  private toUser(userEntity: User): UserM {
-    const user: UserM = new UserM();
+    const userEntity = this.userEntityRepository.create({
+      email,
+      firstName,
+      lastName,
+      avatarUrl: picture,
+    });
 
-    user.id = userEntity.id;
-    user.firstName = userEntity.firstName;
-    user.lastName = userEntity.lastName;
-    user.email = userEntity.email;
-    user.password = userEntity.password;
-    user.createdDate = userEntity.createdDate;
-    user.updatedDate = userEntity.updatedDate;
-    user.phone = userEntity.phone;
-    user.birthday = userEntity.birthday;
-    user.avatarUrl = userEntity.avatarUrl;
-    user.lastLogin = userEntity.lastLogin;
-
-    return user;
+    const result = await this.userEntityRepository.save(userEntity);
+    return this.mapper.map(result, User, UserM);
   }
 
   async updateRefreshToken(email: string, refreshToken: string): Promise<void> {
@@ -48,14 +49,36 @@ export class DatabaseUserRepository implements UserRepository {
   async getUserByEmail(email: string): Promise<UserM> {
     const userEntity = await this.userEntityRepository.findOne({
       where: {
-        email: email,
+        email,
       },
     });
 
     if (!userEntity) {
-      return null;
+      throw new NotFoundException(`User with email ${email} not found`);
     }
-    return this.toUser(userEntity);
+    return this.mapper.map(userEntity, User, UserM);
+  }
+
+  async getUserById(id: number): Promise<UserM> {
+    const userEntity = await this.userEntityRepository.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (!userEntity) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+    return this.mapper.map(userEntity, User, UserM);
+  }
+
+  async getUsersByIds(ids: number[]): Promise<UserM[]> {
+    const userEntities = await this.userEntityRepository.findBy({ id: In(ids) });
+
+    if (!userEntities || userEntities.length === 0) {
+      throw new NotFoundException(`Users with ids ${ids.join(', ')} not found`);
+    }
+    return this.mapper.mapArray(userEntities, User, UserM);
   }
 
   async getUserLogin(email: string): Promise<UserM> {
@@ -66,9 +89,9 @@ export class DatabaseUserRepository implements UserRepository {
       .getOne();
 
     if (!userEntity) {
-      return null;
+      throw new NotFoundException(`User with email ${email} not found`);
     }
-    return this.toUser(userEntity);
+    return this.mapper.map(userEntity, User, UserM);
   }
 
   async updatePassword(email: string, password: string): Promise<void> {
@@ -81,7 +104,6 @@ export class DatabaseUserRepository implements UserRepository {
   }
 
   async updateProfile(email: string, payload: UserM): Promise<UserM> {
-    console.log('payload', payload);
     const user = await this.userEntityRepository.findOne({
       where: {
         email,
@@ -96,7 +118,7 @@ export class DatabaseUserRepository implements UserRepository {
     user.birthday = payload.birthday;
     user.avatarUrl = payload.avatarUrl;
     await this.userEntityRepository.save(user);
-    return this.toUser(user);
+    return this.mapper.map(user, User, UserM);
   }
 
   async updateLastLogin(email: string): Promise<void> {
@@ -106,20 +128,5 @@ export class DatabaseUserRepository implements UserRepository {
       },
       { lastLogin: () => 'CURRENT_TIMESTAMP' },
     );
-  }
-
-  private toUserEntity(user: UserM): User {
-    const userEntity: User = new User();
-
-    userEntity.firstName = user.firstName;
-    userEntity.lastName = user.lastName;
-    userEntity.email = user.email;
-    userEntity.password = user.password;
-    userEntity.phone = user.phone;
-    userEntity.birthday = user.birthday;
-    userEntity.avatarUrl = user.avatarUrl;
-    userEntity.lastLogin = user.lastLogin;
-
-    return userEntity;
   }
 }

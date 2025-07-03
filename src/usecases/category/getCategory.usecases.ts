@@ -4,7 +4,7 @@ import { CategoryM } from '@/domain/model/category';
 export class GetCategoryUseCases {
   constructor(private readonly repo: CategoryRepository) {}
 
-  async execute(id: number): Promise<CategoryM> {
-    return await this.repo.findById(id);
+  async execute(slug: string): Promise<CategoryM> {
+    return await this.repo.findBySlug(slug);
   }
 }

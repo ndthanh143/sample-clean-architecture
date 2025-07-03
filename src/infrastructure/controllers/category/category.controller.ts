@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiExtraModels, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UseCaseProxy } from '../../usecases-proxy/usecases-proxy';
@@ -20,6 +21,10 @@ import { DeleteCategoryUseCases } from '@/usecases/category/deleteCategory.useca
 import { addCategoryUseCases } from '@/usecases/category/addCategory.usecases';
 import { AddCategoryDto, UpdateCategoryDto } from './category-dto';
 import { UpdateCategoryUseCases } from '@/usecases/category/updateCategory.usecases';
+import { Roles } from '@/infrastructure/decorators/roles.decorator';
+import { Role } from '@/utils';
+import { JwtAuthGuard } from '@/infrastructure/common/guards/jwtAuth.guard';
+import { RolesGuard } from '@/infrastructure/common/guards/roles.guard';
 
 @Controller('categories')
 @ApiTags('category')
@@ -39,10 +44,10 @@ export class CategoryController {
     private readonly addCategoryUseCases: UseCaseProxy<addCategoryUseCases>,
   ) {}
 
-  @Get(':id')
+  @Get(':slug')
   @ApiResponseType(CategoryPresenter, false)
-  async getCategory(@Param('id', ParseIntPipe) id: number) {
-    const cate = await this.getCategoryUseCases.getInstance().execute(id);
+  async getCategory(@Param('slug') slug: string) {
+    const cate = await this.getCategoryUseCases.getInstance().execute(slug);
     return new CategoryPresenter(cate);
   }
 
@@ -54,6 +59,8 @@ export class CategoryController {
   }
 
   @Put(':id')
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiResponseType(CategoryPresenter, true)
   async update(@Param('id') id: number, @Body() dto: UpdateCategoryDto) {
     await this.updateCategoryUseCases.getInstance().execute(id, dto);
@@ -61,6 +68,8 @@ export class CategoryController {
   }
 
   @Delete(':id')
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiResponseType(CategoryPresenter, true)
   async deleteCate(@Param('id', ParseIntPipe) id: number) {
     await this.deleteCategoryUseCases.getInstance().execute(id);
@@ -68,6 +77,8 @@ export class CategoryController {
   }
 
   @Post('')
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiResponseType(CategoryPresenter, true)
   async addCate(@Body() dto: AddCategoryDto) {
     const cateCreated = await this.addCategoryUseCases.getInstance().execute(dto);

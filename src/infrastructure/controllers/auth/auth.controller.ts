@@ -2,7 +2,6 @@ import { Body, Controller, Get, Inject, Post, Req, Res, UseGuards } from '@nestj
 import { ApiBearerAuth, ApiExtraModels, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { IsAuthPresenter } from './auth.presenter';
 import { LoginGuard } from '@/infrastructure/common/guards/login.guard';
-import { AuthLoginDto } from './auth-dto';
 import { Response } from 'express';
 import { UsecasesProxyModule } from '@/infrastructure/usecases-proxy/usecases-proxy.module';
 import { UseCaseProxy } from '@/infrastructure/usecases-proxy/usecases-proxy';
@@ -12,6 +11,7 @@ import { JwtAuthGuard } from '@/infrastructure/common/guards/jwtAuth.guard';
 import { ApiResponseType } from '@/infrastructure/common/swagger/response.decorator';
 import JwtRefreshGuard from '@/infrastructure/common/guards/jwtRefresh.guard';
 import { CurrentUser } from '@/infrastructure/decorators';
+import { User } from '@/infrastructure/entities/user.entity';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -32,27 +32,50 @@ export class AuthController {
 
   @Post('login')
   @UseGuards(LoginGuard)
-  async login(@Body() auth: AuthLoginDto, @Res({ passthrough: true }) res: Response) {
+  async login(@CurrentUser() user: User, @Res({ passthrough: true }) res: Response) {
     const accessTokenInfo = await this.loginUsecaseProxy
       .getInstance()
-      .getCookieWithJwtToken(auth.email);
+      .getCookieWithJwtToken(user.id, user.email);
+
     const refreshTokenInfo = await this.loginUsecaseProxy
       .getInstance()
-      .getCookieWithJwtRefreshToken(auth.email);
+      .getCookieWithJwtRefreshToken(user.id, user.email);
 
-    res.cookie('accessToken', accessTokenInfo.token, {
-      path: '/',
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: Number(accessTokenInfo.maxAge),
-    });
     res.cookie('refreshToken', refreshTokenInfo.token, {
       path: '/',
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: Number(refreshTokenInfo.maxAge),
     });
-    return 'Login successful';
+    return accessTokenInfo;
+  }
+
+  @Post('google')
+  async googleLogin(@Body('idToken') idToken: string, @Res({ passthrough: true }) res: Response) {
+    const payload = await this.loginUsecaseProxy
+      .getInstance()
+      .validateUserForGoogleStragtegy(idToken);
+
+    const user = await this.loginUsecaseProxy
+      .getInstance()
+      .findOrCreateGoogleUser(payload.email, payload.name, payload.picture);
+
+    const accessTokenInfo = await this.loginUsecaseProxy
+      .getInstance()
+      .getCookieWithJwtToken(user.id, user.email);
+
+    const refreshTokenInfo = await this.loginUsecaseProxy
+      .getInstance()
+      .getCookieWithJwtRefreshToken(user.id, user.email);
+
+    res.cookie('refreshToken', refreshTokenInfo.token, {
+      path: '/',
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: Number(refreshTokenInfo.maxAge),
+    });
+
+    return accessTokenInfo;
   }
 
   @Get('is_authenticated')
@@ -77,20 +100,19 @@ export class AuthController {
     return 'Logout successful';
   }
 
-  @Get('refresh')
+  @Post('refresh')
   @UseGuards(JwtRefreshGuard)
   @ApiBearerAuth()
-  async refresh(
-    @CurrentUser('email') email: string,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    const accessTokenInfo = await this.loginUsecaseProxy.getInstance().getCookieWithJwtToken(email);
-    response.cookie('accessToken', accessTokenInfo.token, {
-      path: '/',
-      httpOnly: true,
-      secure: true,
-      maxAge: Number(accessTokenInfo.maxAge),
-    });
-    return 'Refresh successful';
+  async refresh(@CurrentUser() user: User, @Res({ passthrough: true }) response: Response) {
+    const accessTokenInfo = await this.loginUsecaseProxy
+      .getInstance()
+      .getCookieWithJwtToken(user.id, user.email);
+    // response.cookie('accessToken', accessTokenInfo.token, {
+    //   path: '/',
+    //   httpOnly: true,
+    //   secure: true,
+    //   maxAge: Number(accessTokenInfo.maxAge),
+    // });
+    return accessTokenInfo;
   }
 }

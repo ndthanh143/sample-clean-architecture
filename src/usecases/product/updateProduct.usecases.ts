@@ -2,7 +2,7 @@ import { ILogger } from '@/domain/logger/logger.interface';
 import { Mapper } from '@automapper/core';
 import { ProductRepository } from '@/domain/repositories/productRepository.interface';
 import { ProductM } from '@/domain/model/product';
-import { UpdateProductDto } from '@/infrastructure/controllers/product/product-dto';
+import { UpdateProductDto } from '@/infrastructure/controllers/product/product.dto';
 import { CategoryRepository } from '@/domain/repositories/categoryRepository.interface';
 
 export class UpdateProductUseCases {
@@ -24,6 +24,6 @@ export class UpdateProductUseCases {
       item.category = category;
     }
     this.repo.updateById(id, item);
-    this.logger.log('UpdateCategoryUseCases execute', `Category ${id} have been updated`);
+    this.logger.log('UpdateProductUseCases execute', `Product ${id} have been updated`);
   }
 }

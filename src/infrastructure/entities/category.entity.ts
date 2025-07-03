@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany } from 'typeorm';
 import { Base } from './base.entity';
 import { AutoMap } from '@automapper/classes';
 import { Product } from './product.entity';
@@ -18,6 +18,31 @@ export class Category extends Base {
   imageUrl: string | null;
 
   @AutoMap()
+  @Column('varchar', { name: 'slug', length: 255, nullable: false })
+  slug: string;
+
+  @AutoMap()
   @OneToMany(() => Product, (product) => product.category)
-  products: Product[];
+  products?: Product[];
+
+  @AutoMap()
+  productCount: number; // column to map the product count
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  generateSlug() {
+    if (this.name) {
+      this.slug = this.slugify(this.name);
+    }
+  }
+
+  slugify(text: string): string {
+    return text
+      .toString()
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+      .replace(/\-\-+/g, '-');
+  }
 }

@@ -11,6 +11,10 @@ export class CategoryPresenter {
   @ApiProperty()
   imageUrl: string | null = null;
   @ApiProperty()
+  slug: string;
+  @ApiProperty()
+  productCount: number;
+  @ApiProperty()
   createdDate: Date;
   @ApiProperty()
   updatedDate: Date;
@@ -20,6 +24,8 @@ export class CategoryPresenter {
     this.name = category.name;
     this.description = category.description;
     this.imageUrl = category.imageUrl;
+    this.slug = category.slug;
+    this.productCount = category.productCount;
     this.createdDate = category.createdDate;
     this.updatedDate = category.updatedDate;
   }
